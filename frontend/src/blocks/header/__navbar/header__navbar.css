@@ -1,0 +1,14 @@
+.header__navbar {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 24px;
+}
+
+  @media screen and (min-width: 320px) and (max-width: 767px) {
+    .header__navbar {
+      padding: 0 20px 5px 0;
+      flex-direction: column;
+      gap: 15px;
+    }
+  }
