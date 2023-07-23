@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const errorMiddleware = require('./middlewares/errors');
 const routes = require('./routes/routes');
+const cors = require('cors');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(routes);
 app.use(errors());
