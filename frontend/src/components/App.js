@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import profileAvatar from "../image/Jacques-Cousteau.png";
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
@@ -20,49 +19,47 @@ import InfoTooltip from "./InfoTooltip";
 import * as auth from "../utils/auth";
 
 function App() {
-  const navigate = useNavigate();
-
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userData, setUserData] = useState("");
+  const [currentUser, setCurrentUser] = useState({});
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isInfoTooltipPopupOpen, setIsInfoTooltipPopupOpen] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
-
-  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
-  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
-  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState({});
-  const [currentUser, setCurrentUser] = useState({
-    avatar: profileAvatar,
-    name: "Жак-Ив-Кусто",
-    about: "Исследователь океана",
-  });
   const [cards, setCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState({});
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [error, setError] = useState(false);
+  
+  const token = localStorage.getItem("token");
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
-    api
-      .getUserData(currentUser)
-      .then((data) => {
-        setCurrentUser(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    api
-      .getInitialCards(cards)
-      .then((card) => {
-        setCards(card);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (localStorage.getItem('token')) {
+      checkToken();
+    }
   }, []);
 
   useEffect(() => {
-    checkToken();
-  }, []);
-
-  useEffect(() => {
-    loggedIn && navigate("/");
+    if (loggedIn) {
+      api(token)
+        .getUserData(currentUser)
+        .then((data) => {
+          setCurrentUser(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      api(token)
+        .getInitialCards(cards)
+        .then((card) => {
+          setCards(card.reverse());
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   }, [loggedIn]);
 
   function handleEditAvatarClick() {
@@ -91,7 +88,7 @@ function App() {
 
   function handleCardLike(card) {
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
-    api
+    api(token)
       .toggleCardLike(card._id, !isLiked)
       .then((newCard) => {
         setCards((state) =>
@@ -105,7 +102,7 @@ function App() {
 
   function handleCardDelete(card) {
     const isOwn = card.owner._id === currentUser._id;
-    api
+    api(token)
       .deleteCard(card._id, !isOwn)
       .then(() => {
         setCards((state) => state.filter((c) => c._id !== card._id));
@@ -116,7 +113,7 @@ function App() {
   }
 
   function handleNewInfo(profileData) {
-    api
+    api(token)
       .sendUserData(profileData)
       .then((newprofileData) => {
         setCurrentUser(newprofileData);
@@ -128,7 +125,7 @@ function App() {
   }
 
   function handleNewAvatar(avatar) {
-    api
+    api(token)
       .sendAvatarData(avatar)
       .then((profileData) => {
         setCurrentUser(profileData);
@@ -140,7 +137,7 @@ function App() {
   }
 
   function handleCardSubmit(card) {
-    api
+    api(token)
       .addNewCard(card)
       .then((newCard) => {
         setCards([newCard, ...cards]);
@@ -152,9 +149,8 @@ function App() {
   }
 
   function handleRegister(email, password) {
-    auth
-      .register(email, password)
-      .then((res) => {
+    auth.register(email, password)
+      .then(() => {
         navigate("/sign-in", { replace: true });
         setIsSuccessful(true);
       })
@@ -168,23 +164,24 @@ function App() {
   }
 
   function handleLogin(email, password) {
-    auth
-      .login(email, password)
-      .then((data) => {
+    auth.login(email, password)
+      .then(data => {
         if (data.token) {
           checkToken();
           setLoggedIn(true);
-          navigate("/", { replace: true });
+          navigate("/");
         }
       })
       .catch((err) => {
+        setError(true);
         console.log(err);
+        setIsInfoTooltipPopupOpen(p => !p);
       });
   }
 
   function handleLogout() {
     localStorage.removeItem("token");
-    setUserData("");
+    setUserEmail("");
     setLoggedIn(false);
     navigate("/sign-in");
   }
@@ -192,14 +189,14 @@ function App() {
   function checkToken() {
     if (localStorage.getItem("token")) {
       const token = localStorage.getItem("token");
-      auth
-        .checkValidityToken(token)
-        .then((res) => {
+
+      auth.checkValidityToken(token)
+        .then(res => {
           if (res) {
-            const email = res.data.email;
+            const email = res.email;
             setLoggedIn(true);
-            setUserData(email);
-            navigate("/", { replace: true });
+            setUserEmail(email);
+            navigate("/");
           }
         })
         .catch((err) => {
@@ -211,7 +208,7 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="body">
-        <Header email={userData} onLogout={handleLogout} />
+        <Header email={userEmail} onLogout={handleLogout} />
         <Routes>
           <Route
             path="/"
@@ -229,7 +226,10 @@ function App() {
               />
             }
           />
-          <Route path="/sign-in" element={<Login onLogin={handleLogin} />} />
+          <Route path="/sign-in" element={<Login 
+            onLogin={handleLogin} 
+            setError={setError} 
+            setIsInfoTooltipPopupOpen={setIsInfoTooltipPopupOpen} />} />
           <Route
             path="/sign-up"
             element={<Register onRegister={handleRegister} />}

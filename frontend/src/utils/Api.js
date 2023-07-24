@@ -1,3 +1,5 @@
+import { BASE_URL } from "./auth";
+
 class Api {
   constructor({ link, headers }) {
     this._link = link;
@@ -13,7 +15,7 @@ class Api {
   }
 
   addNewCard({ name, link }) {
-    return fetch(`${this._link}cards`, {
+    return fetch(`${this._link}/cards`, {
       headers: this._headers,
       method: "POST",
       body: JSON.stringify({ name, link }),
@@ -23,7 +25,7 @@ class Api {
   }
 
   getInitialCards() {
-    return fetch(`${this._link}cards`, {
+    return fetch(`${this._link}/cards`, {
       headers: this._headers,
     }).then((res) => {
       return this._checkResponse(res);
@@ -31,7 +33,7 @@ class Api {
   }
 
   deleteCard(cardId) {
-    return fetch(`${this._link}cards/${cardId}`, {
+    return fetch(`${this._link}/cards/${cardId}`, {
       headers: this._headers,
       method: "DELETE",
     }).then((res) => {
@@ -40,7 +42,7 @@ class Api {
   }
 
   getUserData() {
-    return fetch(`${this._link}users/me`, {
+    return fetch(`${this._link}/users/me`, {
       headers: this._headers,
     }).then((res) => {
       return this._checkResponse(res);
@@ -48,7 +50,7 @@ class Api {
   }
 
   sendUserData({ name, about }) {
-    return fetch(`${this._link}users/me`, {
+    return fetch(`${this._link}/users/me`, {
       headers: this._headers,
       method: "PATCH",
       body: JSON.stringify({ name: name, about: about }),
@@ -58,7 +60,7 @@ class Api {
   }
 
   sendAvatarData(avatar) {
-    return fetch(`${this._link}users/me/avatar`, {
+    return fetch(`${this._link}/users/me/avatar`, {
       headers: this._headers,
       method: "PATCH",
       body: JSON.stringify({ avatar }),
@@ -68,7 +70,7 @@ class Api {
   }
 
   _sendCardLike(_id) {
-    return fetch(`${this._link}cards/${_id}/likes`, {
+    return fetch(`${this._link}/cards/${_id}/likes`, {
       headers: this._headers,
       method: "PUT",
     }).then((res) => {
@@ -77,7 +79,7 @@ class Api {
   }
 
   _deleteCardLike(id) {
-    return fetch(`${this._link}cards/${id}/likes`, {
+    return fetch(`${this._link}/cards/${id}/likes`, {
       headers: this._headers,
       method: "DELETE",
     }).then((res) => {
@@ -90,12 +92,10 @@ class Api {
   }
 }
 
-const apiConfig = {
-  link: "https://mesto.nomoreparties.co/v1/cohort-63/",
+export const api = (token) => new Api({
+  link: BASE_URL,
   headers: {
-    authorization: "94aa74ad-5308-499e-afc4-7f416a23dd02",
+    'Authorization': `Bearer ${token}`,
     "Content-Type": "application/json",
   },
-};
-
-export const api = new Api(apiConfig);
+});
