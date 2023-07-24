@@ -4,13 +4,9 @@ const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
 const createCard = (req, res, next) => {
-  const newCard = {
-    name: req.body.name,
-    link: req.body.link,
-    owner: req.user._id,
-  };
-  Card.create(newCard)
-    .then((card) => res.status(201).send({ data: card }))
+  const { name, link } = req.body;
+  Card.create({ name, link, owner: req.user._id })
+    .then(card => card.populate('owner').then(data => res.status(201).send(data)))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new InvalidError('Неккоректные данные'));
@@ -20,56 +16,54 @@ const createCard = (req, res, next) => {
 };
 
 const getCards = (req, res, next) => {
-  Card.find({})
+  Card.find({}).populate(['likes', 'owner'])
     .then((cards) => res.send(cards))
     .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  const { cardId } = req.params;
-  const { _id } = req.user;
-  Card.findById(cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return next(new NotFoundError('Неккоректные данные'));
+        return next(new NotFoundError(MESSAGE_ERROR_NOT_FOUND));
       }
-      if (_id === card.owner.toString()) {
+
+      if (card.owner.equals(req.user._id)) {
         return card.deleteOne()
           .then(() => res.send(card));
       }
+
       return next(new ForbiddenError('Неккоректные данные для удаления'));
     })
     .catch(next);
 };
 
 const likeCard = (req, res, next) => {
-  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    cardId,
+    req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
-  )
+  ).populate(['likes', 'owner'])
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Данные не найдены');
+        throw new NotFoundError(MESSAGE_ERROR_NOT_FOUND);
       }
-      res.send({ data: card });
+      res.send(card);
     })
     .catch(next);
 };
 
 const dislikeCard = (req, res, next) => {
-  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    cardId,
+    req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
-  )
-    .then((card) => {
+  ).populate('owner')
+    .then(card => {
       if (!card) {
-        throw new NotFoundError('Данные не найдены');
+        throw new NotFoundError(MESSAGE_ERROR_NOT_FOUND);
       }
-      res.send({ data: card });
+      res.send(card);
     })
     .catch(next);
 };

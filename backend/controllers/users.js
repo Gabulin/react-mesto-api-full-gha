@@ -26,7 +26,12 @@ const createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).send(user))
+    .then(user => res.status(201).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email
+    }))
     .catch((err) => {
       if (err.code === 11000) {
         return next(new RegisterError('Пользователь уже существует'));
@@ -42,67 +47,68 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findByCredentials(email, password)
-    .then((user) => {
+    .then(user => {
       const token = jwt.sign({ _id: user._id }, JWT_KEY, {
         expiresIn: '7d',
       });
+
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       });
+
       return res.send({ token });
     })
     .catch(next);
 };
+
 const getUserById = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .then((user) => {
+  User.findById(req.params.userId)
+    .then(user => {
       if (!user) {
         return next(new NotFoundError('Пользователь не найден'));
       }
-      return res.send({ data: user });
+      return res.send(user);
     })
     .catch(next);
 };
 
 const getUser = (req, res, next) => {
-  const { _id } = req.user;
-  User.findById(_id)
-    .then((user) => {
+  User.findById(req.user._id)
+    .then(user => {
       if (!user) {
         return next(new NotFoundError('Пользователь не найден'));
       }
-      return res.send({ data: user });
+
+      return res.send(user);
     })
     .catch(next);
 };
 
 const updateProfile = (req, res, next) => {
-  const { _id } = req.user;
-  const data = {
-    name: req.body.name,
-    about: req.body.about,
-  };
-  return User.findByIdAndUpdate(_id, data, { new: true, runValidators: true })
-    .then((user) => res.send({ data: user }))
+  const data = { name, about } = req.body;
+
+  return User.findByIdAndUpdate(req.user._id, data, { new: true, runValidators: true })
+    .then(user => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new InvalidError('Неккоректные данные'));
       }
+
       return next(err);
     });
 };
 
 const updateAvatar = (req, res, next) => {
-  const { _id } = req.user;
   const data = { avatar: req.body.avatar };
-  User.findByIdAndUpdate(_id, data, { runValidators: true, new: true })
-    .then((user) => res.send({ data: user }))
+
+  return User.findByIdAndUpdate(req.user._id, data, { runValidators: true, new: true })
+    .then(user => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new InvalidError('Неккоректные данные ссылки'));
       }
+
       return next(err);
     });
 };

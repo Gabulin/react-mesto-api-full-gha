@@ -1,6 +1,7 @@
 const cardRouter = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
+const { REGEXP } = require('../utils/Constants');
 const {
   getCards,
   deleteCard,
@@ -28,9 +29,7 @@ cardRouter.post(
       name: Joi.string().min(2).max(30).required(),
       link: Joi.string()
         .required()
-        .pattern(
-          /^https?:\/\/(?:www\.)?[a-zA-Z0-9а-яА-Я-._~:/?#[\]@!$&'()*+,;=]+/im,
-        ),
+        .pattern(REGEXP),
     }),
   }),
   createCard,

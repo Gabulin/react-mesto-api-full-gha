@@ -6,15 +6,15 @@ const AuthError = require('../errors/AuthError');
 const userSchema = new mongoose.Schema(
   {
     name: {
+      type: String,
       minlength: 2,
       maxlength: 30,
-      type: String,
       default: 'Жак-Ив Кусто',
     },
     about: {
+      type: String,
       minlength: 2,
       maxlength: 30,
-      type: String,
       default: 'Исследователь',
     },
     avatar: {
@@ -26,13 +26,13 @@ const userSchema = new mongoose.Schema(
       },
     },
     email: {
-      unique: true,
       type: String,
+      unique: true,
+      required: true,
       validate: {
         validator: (v) => validator.isEmail(v),
         message: 'Неккоректные данные почты',
       },
-      required: true,
     },
     password: {
       type: String,
@@ -42,6 +42,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     toJSON: { virtuals: true },
+    versionKey: false
   },
 );
 

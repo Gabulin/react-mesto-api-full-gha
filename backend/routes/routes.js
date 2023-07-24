@@ -5,6 +5,7 @@ const userRouter = require('./users');
 const cardRouter = require('./cards');
 const auth = require('../middlewares/auth');
 const { login, createUser } = require('../controllers/users');
+const { MESSAGE_ERROR_NOT_FOUND, REGEXP } = require('../utils/Constants');
 
 routes.post(
   '/signin',
@@ -23,9 +24,7 @@ routes.post(
     body: Joi.object().keys({
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
-      avatar: Joi.string().pattern(
-        /^https?:\/\/(?:www\.)?[a-zA-Z0-9а-яА-Я-._~:/?#[\]@!$&'()*+,;=]+/im,
-      ),
+      avatar: Joi.string().pattern(REGEXP),
       email: Joi.string().required().email(),
       password: Joi.string().required().min(2),
     }),
@@ -39,7 +38,7 @@ routes.use('/users', userRouter);
 routes.use('/cards', cardRouter);
 
 routes.use(() => {
-  throw new NotFoundError('Страница не найдена');
+  throw new NotFoundError(MESSAGE_ERROR_NOT_FOUND);
 });
 
 module.exports = routes;
