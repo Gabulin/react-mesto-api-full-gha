@@ -41,6 +41,4 @@ routes.use((req, res, next) => {
   next(new NotFoundError(MESSAGE_ERROR_NOT_FOUND));
 });
 
-
-
 module.exports = routes;
