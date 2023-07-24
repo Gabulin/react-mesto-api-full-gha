@@ -1,4 +1,4 @@
-const { MESSAGE_ERROR_FATAL } = require("../utils/Constants");
+const { MESSAGE_ERROR_FATAL } = require('../utils/Constants');
 
 module.exports = (err, req, res, next) => {
   const { statusCode = 500, message } = err;

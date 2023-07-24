@@ -26,11 +26,11 @@ const createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then(user => res.status(201).send({
+    .then((user) => res.status(201).send({
       name: user.name,
       about: user.about,
       avatar: user.avatar,
-      email: user.email
+      email: user.email,
     }))
     .catch((err) => {
       if (err.code === 11000) {
@@ -47,7 +47,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findByCredentials(email, password)
-    .then(user => {
+    .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_KEY, {
         expiresIn: '7d',
       });
@@ -64,7 +64,7 @@ const login = (req, res, next) => {
 
 const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return next(new NotFoundError('Пользователь не найден'));
       }
@@ -75,7 +75,7 @@ const getUserById = (req, res, next) => {
 
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return next(new NotFoundError('Пользователь не найден'));
       }
@@ -86,10 +86,14 @@ const getUser = (req, res, next) => {
 };
 
 const updateProfile = (req, res, next) => {
-  const data = { name, about } = req.body;
+  const { name, about } = req.body;
 
-  return User.findByIdAndUpdate(req.user._id, data, { new: true, runValidators: true })
-    .then(user => res.send(user))
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new InvalidError('Неккоректные данные'));
@@ -103,7 +107,7 @@ const updateAvatar = (req, res, next) => {
   const data = { avatar: req.body.avatar };
 
   return User.findByIdAndUpdate(req.user._id, data, { runValidators: true, new: true })
-    .then(user => res.send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new InvalidError('Неккоректные данные ссылки'));

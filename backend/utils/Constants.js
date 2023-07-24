@@ -7,11 +7,11 @@ const STATUS_FORBIDDEN = 403;
 
 const MESSAGE_ERROR_AUTH = 'Требуется авторизация';
 const MESSAGE_ERROR_FATAL = 'Ошибка сервера';
-const MESSAGE_ERROR_NOT_FOUND = 'Страница не найдена'
+const MESSAGE_ERROR_NOT_FOUND = 'Страница не найдена';
 
 const JWT_KEY = process.env.JWT_KEY || 'secretKey';
 
-const REGEXP = /^https?:\/\/(?:www\.)?[a-zA-Z0-9а-яА-Я-._~:/?#[\]@!$&'()*+,;=]+/im
+const REGEXP = /^https?:\/\/(?:www\.)?[a-zA-Z0-9а-яА-Я-._~:/?#[\]@!$&'()*+,;=]+/im;
 
 module.exports = {
   JWT_KEY,
@@ -24,5 +24,5 @@ module.exports = {
   STATUS_FORBIDDEN,
   MESSAGE_ERROR_AUTH,
   MESSAGE_ERROR_FATAL,
-  MESSAGE_ERROR_NOT_FOUND
+  MESSAGE_ERROR_NOT_FOUND,
 };

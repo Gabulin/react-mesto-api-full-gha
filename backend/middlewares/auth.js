@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
   const token = authorization.replace('Bearer ', '');
 
   if (!token) {
-    return next(new AuthError(MESSAGE_ERROR_AUTH))
+    return next(new AuthError(MESSAGE_ERROR_AUTH));
   }
 
   let payload;

@@ -2,11 +2,12 @@ const Card = require('../models/card');
 const InvalidError = require('../errors/InvalidError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
+const { MESSAGE_ERROR_NOT_FOUND } = require('../utils/Constants');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then(card => card.populate('owner').then(data => res.status(201).send(data)))
+    .then((card) => card.populate('owner').then((data) => res.status(201).send(data)))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new InvalidError('Неккоректные данные'));
@@ -59,7 +60,7 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   ).populate('owner')
-    .then(card => {
+    .then((card) => {
       if (!card) {
         throw new NotFoundError(MESSAGE_ERROR_NOT_FOUND);
       }

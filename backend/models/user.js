@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     toJSON: { virtuals: true },
-    versionKey: false
+    versionKey: false,
   },
 );
 

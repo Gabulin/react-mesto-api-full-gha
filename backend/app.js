@@ -13,9 +13,9 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 config();
 
-const { 
+const {
   PORT = 3000,
-  MONGO = 'mongodb://127.0.0.1:27017/mestodb'
+  MONGO = 'mongodb://127.0.0.1:27017/mestodb',
 } = process.env;
 
 const limit = rateLimit({
@@ -29,10 +29,12 @@ mongoose.connect(MONGO);
 
 const app = express();
 
-app.use(cors({ origin: [
-  'https://gabulib.frontend.nomoredomains.xyz',
-  'http://localhost:3001'
-] }));
+app.use(cors({
+  origin: [
+    'https://gabulib.frontend.nomoredomains.xyz',
+    'http://localhost:3001',
+  ],
+}));
 app.use(express.json());
 app.use(limit);
 app.use(requestLogger);
