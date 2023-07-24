@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 const cardSchema = new mongoose.Schema(
   {
@@ -13,21 +13,19 @@ const cardSchema = new mongoose.Schema(
       type: String,
       required: true,
       validate: {
-        validator: (v) => {
-          return validator.isURL(v);
-        },
-        message: "Некорректная ссылка",
+        validator: (v) => validator.isURL(v),
+        message: 'Неккоректные данные ссылки',
       },
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "user",
+      ref: 'user',
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: 'user',
         default: [],
       },
     ],
@@ -38,7 +36,7 @@ const cardSchema = new mongoose.Schema(
   },
   {
     versionKey: false,
-  }
+  },
 );
 
-module.exports = mongoose.model("card", cardSchema);
+module.exports = mongoose.model('card', cardSchema);
