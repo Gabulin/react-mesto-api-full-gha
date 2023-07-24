@@ -1,34 +1,44 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const validator = require("validator");
 
-const cardSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-  },
-  link: {
-    type: String,
-    required: true,
-  },
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'user',
-  },
-  likes: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
-      default: [],
+const cardSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 30,
     },
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now(),
+    link: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (v) => {
+          return validator.isURL(v);
+        },
+        message: "Некорректная ссылка",
+      },
+    },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "user",
+    },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        default: [],
+      },
+    ],
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-}, {
-  versionKey: false,
-});
+  {
+    versionKey: false,
+  }
+);
 
-module.exports = mongoose.model('card', cardSchema);
+module.exports = mongoose.model("card", cardSchema);

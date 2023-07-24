@@ -12,7 +12,7 @@ routes.post(
   celebrate({
     body: Joi.object().keys({
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(2),
+      password: Joi.string().required(),
     }),
   }),
   login,
@@ -26,7 +26,7 @@ routes.post(
       about: Joi.string().min(2).max(30),
       avatar: Joi.string().pattern(REGEXP),
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(2),
+      password: Joi.string().required(),
     }),
   }),
   createUser,
@@ -37,8 +37,14 @@ routes.use(auth);
 routes.use('/users', userRouter);
 routes.use('/cards', cardRouter);
 
-routes.use(() => {
-  throw new NotFoundError(MESSAGE_ERROR_NOT_FOUND);
+routes.use((req, res, next) => {
+  next(new NotFoundError(MESSAGE_ERROR_NOT_FOUND));
+});
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
 });
 
 module.exports = routes;

@@ -63,14 +63,24 @@ const login = (req, res, next) => {
 };
 
 const getUserById = (req, res, next) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        return next(new NotFoundError('Пользователь не найден'));
-      }
-      return res.send(user);
-    })
-    .catch(next);
+  try {
+    User.findById(req.params.userId)
+      .then((user) => {
+        if (!user) {
+          throw new NotFoundError('Пользователь не найден');
+        }
+        return res.send(user);
+      })
+      .catch((err) => {
+        if (err.name === 'CastError') {
+          res.status(400).json({ error: 'Неверный формат идентификатора пользователя' });
+        } else {
+          next(err);
+        }
+      });
+  } catch (err) {
+    next(err);
+  }
 };
 
 const getUser = (req, res, next) => {
