@@ -41,10 +41,6 @@ routes.use((req, res, next) => {
   next(new NotFoundError(MESSAGE_ERROR_NOT_FOUND));
 });
 
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
+
 
 module.exports = routes;

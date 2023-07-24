@@ -45,4 +45,10 @@ app.use(errorLogger);
 app.use(errors());
 app.use(errorMiddleware);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.listen(PORT, () => console.log(`Server listen: ${PORT}`));
